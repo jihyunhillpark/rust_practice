@@ -10,39 +10,41 @@ fn handle_client(mut stream: TcpStream) {
     let _first_ls = "l".to_string();
     let _first_get = "g".to_string();
 
-    match stream.read(&mut data) {
-        Ok(_size) => {
-            // echo
-            let clientc = from_utf8(&data).unwrap();
-            let cmp = String::from(clientc[0..1].to_string());
+    loop{
+        match stream.read(&mut data) {
+            Ok(_size) => {
+                // echo
+                let clientc = from_utf8(&data).unwrap();
+                let cmp = String::from(&clientc[0..1]);
 
-            match &cmp[..] {
-                "l" => {
-                    println!("...Listing current directory in Client...");
-                    let output = Command::new("ls").output()
-                                                   .expect("ls command failed to start");
-                    stream.write(&output.stdout).unwrap();
-                },
-                "g" => {
-                    let second_argument = &clientc[4..].trim();
-                    let filename = second_arg(&second_argument);
-                    println!("...Find {} asap!!...", filename);
+                match &cmp[..] {
+                    "l" => {
+                        println!("...Listing current directory in Client...");
+                        let output = Command::new("ls").output()
+                                                       .expect("ls command failed to start");
+                        stream.write(&output.stdout).unwrap();
+                    },
+                    "g" => {
+                        let second_argument = &clientc[4..].trim();
+                        let filename = second_arg(&second_argument);
+                        println!("...Find {} asap!!...", filename);
 
-                    let filecontents = read_a_file(&filename);
-                    if  &filecontents[..] == "error" {
-                        stream.write(b"error").unwrap();
-                    }
-                    else{
-                        stream.write(&filecontents.as_bytes()).unwrap();
-                    }
-                },
-                _ => {},
+                        let filecontents = read_a_file(&filename);
+                        if  &filecontents[..] == "error" {
+                            stream.write(b"error").unwrap();
+                        }
+                        else{
+                            stream.write(&filecontents.as_bytes()).unwrap();
+                        }
+                    },
+                    _ => {},
+                }
+            },
+            Err(_) => {
+                println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
+                stream.shutdown(Shutdown::Both).unwrap();
+                //false
             }
-        },
-        Err(_) => {
-            println!("An error occurred, terminating connection with {}", stream.peer_addr().unwrap());
-            stream.shutdown(Shutdown::Both).unwrap();
-            //false
         }
     }
 }
