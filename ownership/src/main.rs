@@ -48,6 +48,10 @@ fn main() {
     println!("s1 = {}, s2 = {}", s1, s2);
 
     /* Ownership and function */
+    //passing the arguement in function is similar to
+    //assing value to variable
+    //such that passing the arguement in function
+    //indcates 'Move' or 'copy'
     let s3 = String::from("hello");  // s3가 스코프 안으로 들어왔습니다.
 
     takes_ownership(s3);             // s3의 값이 함수 안으로 이동했습니다...
